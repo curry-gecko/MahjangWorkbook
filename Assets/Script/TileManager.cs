@@ -16,6 +16,7 @@ namespace CGC.App
         {
             Tiles = new List<Tile>();
             InitializeTiles();
+            ShuffleTiles();
         }
 
         // Update is called once per frame

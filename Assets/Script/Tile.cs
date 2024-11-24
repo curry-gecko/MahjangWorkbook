@@ -4,7 +4,7 @@ using UnityEngine;
 namespace CGC.App
 {
     [Serializable]
-    public class Tile
+    public class Tile : MonoBehaviour
     {
         public Tile(TileSuit suit, bool isRedDora)
         {
