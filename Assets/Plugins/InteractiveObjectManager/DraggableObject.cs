@@ -16,21 +16,21 @@ namespace InteractiveObjectManager
         {
         }
 
-        public void OnMouseClick()
+        public virtual void OnMouseClick()
         {
             _isDragging = true;
         }
 
-        public void OnMouseDragging()
+        public virtual void OnMouseDragging()
         {
         }
 
-        public void OnMouseOnObject()
+        public virtual void OnMouseOnObject()
         {
             return;
         }
 
-        public void OnMouseRelease()
+        public virtual void OnMouseRelease()
         {
             _isDragging = false;
         }
