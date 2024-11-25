@@ -38,7 +38,7 @@ namespace InteractiveObjectManager
             this.UpdateAsObservable()
                 .Where(_ => currentDraggingObject != null)
                 .Where(_ => Input.GetMouseButton(0))
-                .Subscribe(_ => FollowMousePosition())
+                .Subscribe(_ => currentDraggingObject.OnMouseDragging())
                 .AddTo(this);
         }
 
@@ -109,16 +109,6 @@ namespace InteractiveObjectManager
                 }
             }
 
-        }
-
-        // FixMe: 他と関数名違うの嫌だな
-        void FollowMousePosition()
-        {
-            // currentDraggingObject をMousePositionへ追従させる
-            Transform draggableObjectTransform = currentDraggingObject.Me.transform;
-            Vector3 mousePos = Input.mousePosition;
-            mousePos.z = Camera.main.WorldToScreenPoint(draggableObjectTransform.position).z;
-            draggableObjectTransform.position = Camera.main.ScreenToWorldPoint(mousePos);
         }
 
         RaycastHit2D[] GetHits()

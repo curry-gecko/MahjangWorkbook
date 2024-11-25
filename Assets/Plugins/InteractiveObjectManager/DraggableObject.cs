@@ -6,11 +6,11 @@ namespace InteractiveObjectManager
     {
         // interface
         public bool Draggable => true;
-        private bool _isDragging = false;
+        public bool IsDragging { get; private set; }
         public GameObject Me => gameObject;
         abstract public string Tag { get; }
 
-        bool IClickableObject.IsDragging => _isDragging;
+        bool IClickableObject.IsDragging => IsDragging;
 
         public void Start()
         {
@@ -18,11 +18,16 @@ namespace InteractiveObjectManager
 
         public virtual void OnMouseClick()
         {
-            _isDragging = true;
+            IsDragging = true;
         }
 
         public virtual void OnMouseDragging()
         {
+            // currentDraggingObject をMousePositionへ追従させる
+            Transform draggableObjectTransform = Me.transform;
+            Vector3 mousePos = Input.mousePosition;
+            mousePos.z = Camera.main.WorldToScreenPoint(draggableObjectTransform.position).z;
+            draggableObjectTransform.position = Camera.main.ScreenToWorldPoint(mousePos);
         }
 
         public virtual void OnMouseOnObject()
@@ -32,7 +37,7 @@ namespace InteractiveObjectManager
 
         public virtual void OnMouseRelease()
         {
-            _isDragging = false;
+            IsDragging = false;
         }
 
     }
