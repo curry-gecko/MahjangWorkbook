@@ -1,3 +1,4 @@
+using UniRx;
 using UnityEngine;
 
 namespace InteractiveObjectManager
@@ -10,6 +11,7 @@ namespace InteractiveObjectManager
         void OnMouseOnObject();
         // 
         bool Draggable { get; }
+        bool IsDragging { get; }
         GameObject Me { get; }
         string Tag { get; }
     }
