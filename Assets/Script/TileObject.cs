@@ -1,4 +1,5 @@
 using System;
+using DG.Tweening;
 using InteractiveObjectManager;
 using UniRx;
 using UniRx.Triggers;
@@ -13,5 +14,15 @@ namespace CGC.App
         private Tile tile;
 
         public override string Tag => "TileObject";
+
+        //
+        public Tween CurrentPositionTween = null;
+
+        public override void OnMouseDragging()
+        {
+            // base.OnMouseDragging();
+            return;
+        }
+
     }
 }
