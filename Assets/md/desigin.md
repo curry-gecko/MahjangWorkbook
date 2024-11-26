@@ -59,11 +59,17 @@
   - Haku
   - Hatsu
   - Chun
+- 手牌マネージャー HandManager
+  - ツモ牌を整理するよ
+  - ツモる
+  - 切る
 - 手牌クラス Hand
   - 手牌の並びを
 
-``` mermaid
-
-flowchart
+```mermaid
+flowchart LR
+  id[aaa]
+  id2[bbb]
+  id --> id2
 
 ```

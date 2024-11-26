@@ -24,6 +24,25 @@ namespace CGC.App
             UpdateHandLayout();
         }
 
+        // 牌を引く処理
+        public void DrawTile()
+        {
+
+        }
+
+        // 牌を切る処理
+        public void DiscardTile()
+        {
+
+        }
+
+        // 牌の自動整理
+        public void SortTile()
+        {
+
+        }
+
+        // 手札のUI更新 
         private void UpdateHandLayout()
         {
             //
@@ -50,6 +69,10 @@ namespace CGC.App
                 {
                     // 手札に存在する状態
                     float xPosition = (i - countOfPending) * xPadding;
+                    if (i == tiles.Count - 1)
+                    {
+                        xPosition += xPadding;
+                    }
                     float yPosition = yPadding;
                     float zPosition = i * zPadding + 1;
                     Vector3 pos = new Vector3(xPosition, yPosition, zPosition);

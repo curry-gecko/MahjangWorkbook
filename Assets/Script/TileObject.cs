@@ -7,11 +7,12 @@ using UnityEngine;
 
 namespace CGC.App
 {
-    [Serializable]
     public class TileObject : DraggableObject
     {
         //
-        private Tile tile;
+        [SerializeField]
+        public Tile tile;
+        private TextOnGameObject textOnGameObject;
 
         public override string Tag => "TileObject";
 
@@ -23,6 +24,18 @@ namespace CGC.App
             // base.OnMouseDragging();
             return;
         }
+
+        new void Start()
+        {
+
+            textOnGameObject = GetComponent<TextOnGameObject>();
+
+            if (textOnGameObject != null)
+            {
+                textOnGameObject.textToDisplay = tile.TileToString();
+            }
+        }
+
 
     }
 }
