@@ -1,3 +1,4 @@
+using UniRx;
 using UnityEngine;
 
 namespace CGC.App
@@ -7,7 +8,8 @@ namespace CGC.App
     /// </summary>
     public class TextOnGameObject : MonoBehaviour
     {
-        public string textToDisplay = "Hello, World!";
+        private ReactiveProperty<string> textToDisplay = new();
+        // public IReadOnlyReactiveProperty<string> TextToDisplay => textToDisplay;
         public Color textColor = Color.black;
         public float textSize = 0.2f;
 
@@ -20,13 +22,22 @@ namespace CGC.App
 
             // TextMeshコンポーネントを追加
             TextMesh textMesh = textObject.AddComponent<TextMesh>();
-            textMesh.text = textToDisplay;
+            // textMesh.text = textToDisplay;
             textMesh.characterSize = textSize;
             textMesh.color = textColor;
 
             // フォントやアライメントを設定（任意）
             textMesh.anchor = TextAnchor.MiddleCenter;
             textMesh.fontSize = 48; // 解像度による文字サイズ
+
+            //
+            textToDisplay.Subscribe(text => textMesh.text = text);
+
+        }
+
+        public void SetTextToDisplay(string _text)
+        {
+            textToDisplay.Value = _text;
         }
     }
 }

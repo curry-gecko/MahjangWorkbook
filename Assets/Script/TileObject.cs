@@ -32,7 +32,7 @@ namespace CGC.App
 
             if (textOnGameObject != null)
             {
-                textOnGameObject.textToDisplay = tile.TileToString();
+                textOnGameObject.SetTextToDisplay(tile.TileToString());
             }
         }
 
