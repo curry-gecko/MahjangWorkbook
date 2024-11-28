@@ -8,15 +8,31 @@ namespace CGC.App
     public class TileManager : MonoBehaviour
     {
         [SerializeField]
-        private List<Tile> Tiles;
+        private List<Tile> _tiles;
 
         public bool useRedDora = false;
 
+        //
+        [SerializeField]
+        private GameObject _tileObjectPrefab;
+        [SerializeField]
+        private HandManager _handManager;
+
         void Start()
         {
-            Tiles = new List<Tile>();
+            _tiles = new List<Tile>();
             InitializeTiles();
             ShuffleTiles();
+
+            if (_tileObjectPrefab == null)
+            {
+                Debug.Log("OnStart" + ": TileObjectPrefab is null.");
+            }
+
+            if (_handManager == null)
+            {
+                Debug.Log("OnStart" + ": _handManager is null.");
+            }
         }
 
         // Update is called once per frame
@@ -28,7 +44,7 @@ namespace CGC.App
         // 牌の初期化
         private void InitializeTiles()
         {
-            Tiles.Clear();
+            _tiles.Clear();
 
             // 数牌
             AddNumberedTiles(TileSuit.Manzu);
@@ -57,7 +73,7 @@ namespace CGC.App
             {
                 for (int i = 0; i < 4; i++)
                 {
-                    Tiles.Add(new Tile(suit, n));
+                    _tiles.Add(new Tile(suit, n));
                 }
             }
         }
@@ -67,7 +83,7 @@ namespace CGC.App
         {
             for (int i = 0; i < 4; i++)
             {
-                Tiles.Add(new Tile(suit, number));
+                _tiles.Add(new Tile(suit, number));
             }
         }
 
@@ -75,11 +91,42 @@ namespace CGC.App
         {
 
             System.Random rng = new();
-            for (int i = Tiles.Count - 1; i > 0; i--)
+            for (int i = _tiles.Count - 1; i > 0; i--)
             {
                 int swapIndex = rng.Next(i + 1);
-                (Tiles[swapIndex], Tiles[i]) = (Tiles[i], Tiles[swapIndex]);
+                (_tiles[swapIndex], _tiles[i]) = (_tiles[i], _tiles[swapIndex]);
             }
+        }
+
+        public GameObject DistributeTile()
+        {
+            Tile tile = PopTile(0);
+
+            return InstantiateTileObject(tile);
+        }
+
+        private Tile PopTile(int tileIndex)
+        {
+            Tile tile = _tiles[tileIndex];
+            _tiles.RemoveAt(tileIndex);
+            return tile;
+        }
+        private GameObject InstantiateTileObject(Tile tile)
+        {
+            if (_tileObjectPrefab == null)
+            {
+                Debug.Log("InstantiateTileObject " + ":" + " TileObjectPrefab is null.");
+                return null;
+            }
+
+            GameObject prefab = Instantiate(_tileObjectPrefab, null);
+
+            if (prefab.TryGetComponent<TileObject>(out var _tileObject))
+            {
+                _tileObject.SetTile(tile);
+            }
+
+            return prefab;
         }
     }
 }

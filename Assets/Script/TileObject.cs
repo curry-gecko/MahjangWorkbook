@@ -36,6 +36,11 @@ namespace CGC.App
             }
         }
 
-
+        //
+        public void SetTile(Tile _tile)
+        {
+            tile = _tile;
+            textOnGameObject?.SetTextToDisplay(_tile.TileToString());
+        }
     }
 }

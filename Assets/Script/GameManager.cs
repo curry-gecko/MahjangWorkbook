@@ -8,7 +8,10 @@ namespace CGC.App
         private ReactiveProperty<GameState> _gameState = new();
         public IReadOnlyReactiveProperty<GameState> GameState => _gameState;
 
-        private
+        [SerializeField]
+        private HandManager _handManager;
+        [SerializeField]
+        private TileManager _tileManager;
 
         // Start is called once before the first execution of Update after the MonoBehaviour is created
         void Start()
@@ -28,9 +31,14 @@ namespace CGC.App
         }
 
         // 開始中
-        void StartGameInProgress()
+        // TODO 最終的にはステートで制御する
+        public void StartGameInProgress()
         {
-
+            // player に 牌を配る
+            for (int i = 0; i < 14; i++)
+            {
+                _handManager.ReceiveTile(_tileManager.DistributeTile());
+            }
         }
 
         // 開始完了

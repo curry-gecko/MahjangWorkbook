@@ -25,9 +25,13 @@ namespace CGC.App
         }
 
         // 牌を引く処理
-        public void DrawTile()
+        public void ReceiveTile(GameObject receiveObject)
         {
-
+            receiveObject.transform.SetParent(transform);
+            if (receiveObject.TryGetComponent<TileObject>(out var tileObject))
+            {
+                tiles.Add(tileObject);
+            }
         }
 
         // 牌を切る処理
