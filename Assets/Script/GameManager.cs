@@ -39,6 +39,7 @@ namespace CGC.App
             {
                 _handManager.ReceiveTile(_tileManager.DistributeTile());
             }
+            _handManager.SortTile();
         }
 
         // 開始完了

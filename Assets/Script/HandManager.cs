@@ -44,6 +44,26 @@ namespace CGC.App
         public void SortTile()
         {
 
+            // ソート基準: Suit → Number → 赤ドラ
+            tiles.Sort((a, b) =>
+            {
+                // Suitで比較
+                int suitComparison = a.tile.Suit.CompareTo(b.tile.Suit);
+                if (suitComparison != 0)
+                {
+                    return suitComparison;
+                }
+
+                // Numberで比較
+                int numberComparison = a.tile.Number.CompareTo(b.tile.Number);
+                if (numberComparison != 0)
+                {
+                    return numberComparison;
+                }
+
+                // 赤ドラ
+                return b.tile.IsRedDora.CompareTo(a.tile.IsRedDora);
+            });
         }
 
         // 手札のUI更新 
@@ -80,8 +100,11 @@ namespace CGC.App
                     float yPosition = yPadding;
                     float zPosition = i * zPadding + 1;
                     Vector3 pos = new Vector3(xPosition, yPosition, zPosition);
-                    tile.CurrentPositionTween = tile.transform.DOLocalMove(pos, 0.1f)
-                            .OnComplete(() => tile.CurrentPositionTween = null);
+                    if (tile.transform.position != pos && tile.CurrentPositionTween == null)
+                    {
+                        tile.CurrentPositionTween = tile.transform.DOLocalMove(pos, 0.1f)
+                                .OnComplete(() => tile.CurrentPositionTween = null);
+                    }
                 }
             }
         }
