@@ -1,3 +1,4 @@
+using System;
 using UniRx;
 using UnityEngine;
 
@@ -5,6 +6,7 @@ namespace CGC.App
 {
     public class GameManager : MonoBehaviour
     {
+        private static int TILE_MAX_NUM = 13;
         private ReactiveProperty<GameState> _gameState = new();
         public IReadOnlyReactiveProperty<GameState> GameState => _gameState;
 
@@ -35,9 +37,9 @@ namespace CGC.App
         public void StartGameInProgress()
         {
             // player に 牌を配る
-            for (int i = 0; i < 14; i++)
+            for (int i = 0; i < TILE_MAX_NUM; i++)
             {
-                _handManager.ReceiveTile(_tileManager.DistributeTile());
+                _handManager.AddTiles(_tileManager.DistributeTile());
             }
             _handManager.SortTile();
         }
@@ -49,9 +51,16 @@ namespace CGC.App
         }
 
         // 手番管理
-        void ManagePlayerTurn()
+        // TODO 最終的にはステートで制御する
+        public void ManagePlayerTurn()
         {
-
+            // 
+            if (!_handManager.waitTsumo)
+            {
+                // ツモることができない時呼び出すことはできない
+                throw new InvalidOperationException("ツモることができない時呼び出すことはできない");
+            }
+            _handManager.ReceiveTile(_tileManager.DistributeTile());
         }
 
         // 終了準備
