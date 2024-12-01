@@ -14,7 +14,8 @@ namespace CGC.App
         public Tile tile;
         private TextOnGameObject textOnGameObject;
 
-        public override string Tag => "TileObject";
+        private readonly ObjectTag objectTag = ObjectTag.TileObject;
+        public override string Tag => objectTag.ToString();
 
         //
         public Tween CurrentPositionTween = null;
@@ -41,6 +42,11 @@ namespace CGC.App
         {
             tile = _tile;
             textOnGameObject?.SetTextToDisplay(_tile.TileToString());
+        }
+
+        private void OnDestroy()
+        {
+            CurrentPositionTween.Kill();
         }
     }
 }

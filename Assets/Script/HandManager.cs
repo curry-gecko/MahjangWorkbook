@@ -53,9 +53,34 @@ namespace CGC.App
         }
 
         // 牌を切る処理
-        public void DiscardTile(int index)
+        public void DiscardTile(TileObject targetTile)
         {
+            if (_tsumoTile == null)
+            {
+                throw new InvalidOperationException("牌を切ることができるタイミングではありません。");
+            }
+
+            // ツモ切り
+            if (_tsumoTile == targetTile)
+            {
+                _tsumoTile = null;
+                Destroy(targetTile.gameObject);
+                return;
+            }
+
+            // 手牌切り
+            int index = _tiles.FindIndex(t => t.Me == targetTile.Me);
+
             //
+            if (index < 0)
+            {
+                throw new InvalidOperationException("切ることができる牌が見つかりません。");
+            }
+            Destroy(targetTile.gameObject);
+            _tiles.RemoveAt(index);
+            _tiles.Add(_tsumoTile);
+            _tsumoTile = null;
+            SortTile();
         }
 
         // 牌の自動整理
