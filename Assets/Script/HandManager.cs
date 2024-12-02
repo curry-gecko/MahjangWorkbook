@@ -1,16 +1,24 @@
 using System;
 using System.Collections.Generic;
 using DG.Tweening;
+using UniRx;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace CGC.App
 {
     public class HandManager : MonoBehaviour
     {
+        [SerializeField]
+        private TileManager _tileManager;
         private List<TileObject> _tiles = new();
         private TileObject _tsumoTile;
         public int TilesCount => _tiles.Count;
-        public bool waitTsumo => _tsumoTile == null;
+
+        private ReactiveProperty<bool> _waitDiscard = new(false);
+        private IDisposable _waitDiscardDisposable;
+
+        public IReadOnlyReactiveProperty<bool> WaitDiscard => _waitDiscard;
         private float xPadding = 1.05f;
         private float yPadding = 0.2f;
         private float zPadding = 1.0f;
@@ -38,17 +46,18 @@ namespace CGC.App
             }
         }
         // 牌を引く処理
-        public void ReceiveTile(GameObject receiveObject)
+        private void ReceiveTile(GameObject receiveObject)
         {
             if (_tsumoTile != null)
             {
-                throw new InvalidOperationException("ツモ牌がすでに積まれています。"); // 想定が
+                throw new InvalidOperationException("ツモ牌がすでに積まれています。");
             }
 
             receiveObject.transform.SetParent(transform);
             if (receiveObject.TryGetComponent<TileObject>(out var tileObject))
             {
                 _tsumoTile = tileObject;
+                _waitDiscard.Value = true;
             }
         }
 
@@ -57,29 +66,49 @@ namespace CGC.App
         {
             if (_tsumoTile == null)
             {
-                throw new InvalidOperationException("牌を切ることができるタイミングではありません。");
+                Debug.LogError($"[DiscardTile] 牌を切ることができるタイミングではありません。: {_tsumoTile.tile}");
+                return;
             }
 
             // ツモ切り
             if (_tsumoTile == targetTile)
             {
-                _tsumoTile = null;
                 Destroy(targetTile.gameObject);
+                ResetTsumoTile();
                 return;
             }
-
-            // 手牌切り
-            int index = _tiles.FindIndex(t => t.Me == targetTile.Me);
-
-            //
-            if (index < 0)
+            else
             {
-                throw new InvalidOperationException("切ることができる牌が見つかりません。");
+                // 手牌切り
+                int index = _tiles.FindIndex(t => t.Me == targetTile.Me);
+                //
+                if (index < 0)
+                {
+                    Debug.LogError($"[DiscardTile] 指定された牌が見つかりません: {targetTile}");
+                    return;
+                }
+                // 
+                DiscardHand(index);
+                Destroy(targetTile.gameObject);
+
+                ResetTsumoTile();
+
+                return;
             }
-            Destroy(targetTile.gameObject);
+        }
+
+        // 手牌を切った時の処理
+        private void DiscardHand(int index)
+        {
             _tiles.RemoveAt(index);
             _tiles.Add(_tsumoTile);
+        }
+
+        // ツモ牌を削除し
+        private void ResetTsumoTile()
+        {
             _tsumoTile = null;
+            _waitDiscard.Value = false;
             SortTile();
         }
 
@@ -107,6 +136,41 @@ namespace CGC.App
                 // 赤ドラ
                 return b.tile.IsRedDora.CompareTo(a.tile.IsRedDora);
             });
+        }
+        private bool CanExecuteTurn()
+        {
+            return _tsumoTile == null;
+        }
+        // 手番ロジック
+        public void ExecuteTurn(Action onTurnEnd)
+        {
+
+            if (!CanExecuteTurn())
+            {
+                return;
+            }
+
+            try
+            {
+                // ツモ牌を取得
+                ReceiveTile(_tileManager.DistributeTile());
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"手番実行エラー: {ex.Message}");
+            }
+            // 購読の重複を禁止
+            _waitDiscardDisposable?.Dispose();
+
+            // 待機中に手番終了を監視し、手番終了時のコールバックを呼び出す
+            _waitDiscardDisposable = _waitDiscard
+                .Where(b => b == false)
+                .First()
+                .Subscribe(_ =>
+                {
+                    ResetTsumoTile();
+                    onTurnEnd?.Invoke();
+                });
         }
 
         // 手札のUI更新 
@@ -140,7 +204,9 @@ namespace CGC.App
                 else if (_tsumoTile.CurrentPositionTween == null && !_tsumoTile.CurrentPositionTween.IsActive())
                 {
                     Vector3 pos = CalculateTilePosition(_tiles.Count);
-                    SetTweenMoveTile(_tsumoTile, pos);
+                    // ツモ牌はTween不要
+                    // SetTweenMoveTile(_tsumoTile, pos);
+                    _tsumoTile.transform.position = pos;
                 }
                 // 
             }
