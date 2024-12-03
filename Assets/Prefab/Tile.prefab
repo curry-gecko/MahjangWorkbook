@@ -160,6 +160,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c02bd7d67da9a344bbc49808ca6b9a12, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  textToDisplay: Hello, World!
   textColor: {r: 1, g: 1, b: 1, a: 1}
-  textSize: 0.2
+  textSize: 0.1

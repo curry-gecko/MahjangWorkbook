@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using DG.Tweening;
 using UniRx;
-using Unity.VisualScripting;
 using UnityEngine;
+using CGC.App.TileExtensions;
 
 namespace CGC.App
 {
@@ -11,15 +12,16 @@ namespace CGC.App
     {
         [SerializeField]
         private TileManager _tileManager;
-        private List<TileObject> _tiles = new();
+        private List<TileObject> _tileObjects = new();
+
         private TileObject _tsumoTile;
-        public int TilesCount => _tiles.Count;
+        public int TilesCount => _tileObjects.Count;
 
         private ReactiveProperty<bool> _waitDiscard = new(false);
         private IDisposable _waitDiscardDisposable;
 
         public IReadOnlyReactiveProperty<bool> WaitDiscard => _waitDiscard;
-        private float xPadding = 1.05f;
+        private float xPadding = 1.2f;
         private float yPadding = 0.2f;
         private float zPadding = 1.0f;
 
@@ -42,7 +44,7 @@ namespace CGC.App
             receiveObject.transform.SetParent(transform);
             if (receiveObject.TryGetComponent<TileObject>(out var tileObject))
             {
-                _tiles.Add(tileObject);
+                _tileObjects.Add(tileObject);
             }
         }
         // 牌を引く処理
@@ -80,7 +82,7 @@ namespace CGC.App
             else
             {
                 // 手牌切り
-                int index = _tiles.FindIndex(t => t.Me == targetTile.Me);
+                int index = _tileObjects.FindIndex(t => t.Me == targetTile.Me);
                 //
                 if (index < 0)
                 {
@@ -100,8 +102,8 @@ namespace CGC.App
         // 手牌を切った時の処理
         private void DiscardHand(int index)
         {
-            _tiles.RemoveAt(index);
-            _tiles.Add(_tsumoTile);
+            _tileObjects.RemoveAt(index);
+            _tileObjects.Add(_tsumoTile);
         }
 
         // ツモ牌を削除し
@@ -115,27 +117,7 @@ namespace CGC.App
         // 牌の自動整理
         public void SortTile()
         {
-
-            // ソート基準: Suit → Number → 赤ドラ
-            _tiles.Sort((a, b) =>
-            {
-                // Suitで比較
-                int suitComparison = a.tile.Suit.CompareTo(b.tile.Suit);
-                if (suitComparison != 0)
-                {
-                    return suitComparison;
-                }
-
-                // Numberで比較
-                int numberComparison = a.tile.Number.CompareTo(b.tile.Number);
-                if (numberComparison != 0)
-                {
-                    return numberComparison;
-                }
-
-                // 赤ドラ
-                return b.tile.IsRedDora.CompareTo(a.tile.IsRedDora);
-            });
+            _tileObjects.SortTileObjects();
         }
         private bool CanExecuteTurn()
         {
@@ -177,9 +159,9 @@ namespace CGC.App
         private void UpdateHandLayout()
         {
             //
-            for (int i = 0; i < _tiles.Count; i++)
+            for (int i = 0; i < _tileObjects.Count; i++)
             {
-                TileObject tile = _tiles[i];
+                TileObject tile = _tileObjects[i];
 
                 if (tile.IsDragging)
                 {
@@ -203,10 +185,10 @@ namespace CGC.App
                 }
                 else if (_tsumoTile.CurrentPositionTween == null && !_tsumoTile.CurrentPositionTween.IsActive())
                 {
-                    Vector3 pos = CalculateTilePosition(_tiles.Count);
+                    Vector3 pos = CalculateTilePosition(_tileObjects.Count);
                     // ツモ牌はTween不要
-                    // SetTweenMoveTile(_tsumoTile, pos);
-                    _tsumoTile.transform.position = pos;
+                    SetTweenMoveTile(_tsumoTile, pos);
+                    // _tsumoTile.transform.position = pos;
                 }
                 // 
             }
@@ -231,7 +213,7 @@ namespace CGC.App
         {
 
             float xPosition = index * xPadding;
-            if (index == _tiles.Count)
+            if (index == _tileObjects.Count)
             {
                 // ツモ牌の場合
                 xPosition += xPadding;
@@ -250,6 +232,28 @@ namespace CGC.App
                 targetTile.CurrentPositionTween = targetTile.transform.DOLocalMove(assertPosition, 0.1f)
                         .OnComplete(() => targetTile.CurrentPositionTween = null);
             }
+        }
+
+
+        public List<Tile> GetTiles()
+        {
+            List<Tile> sortedTiles = _tileObjects.Select(obj => obj.tile).ToList();
+            if (_tsumoTile != null)
+            {
+                sortedTiles.Add(_tsumoTile.tile);
+            }
+            sortedTiles.SortTiles();
+            return sortedTiles;
+        }
+
+        // この関数がbutton のOnclick に指定できない
+        public void CheckWinningHand()
+        {
+            WinningHandChecker checker = new();
+            bool isWinning = checker.CheckWinningHand(GetTiles());
+
+            Debug.Log("tag" + ":" + isWinning);
+
         }
     }
 }

@@ -103,6 +103,7 @@ namespace CGC.App
         void PreparingEndGame()
         {
             // 終了条件を満たさない場合、ステートを手番に戻す
+            // TODO プレイヤーから和了を実行された際に判定をチェックし、実行する。
             _stateManager.GotoTurnN();
         }
 
