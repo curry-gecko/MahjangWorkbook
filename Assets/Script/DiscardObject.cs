@@ -10,7 +10,7 @@ namespace CGC.App
         public override string Tag => objectTag.ToString();
 
         // Start is called once before the first execution of Update after the MonoBehaviour is created
-        public void Start()
+        new public void Start()
         {
 
         }
