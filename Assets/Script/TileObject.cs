@@ -42,6 +42,7 @@ namespace CGC.App
         {
             tile = _tile;
             textOnGameObject?.SetTextToDisplay(_tile.TileToString());
+            gameObject.name = _tile.TileToString();
         }
 
         private void OnDestroy()
